@@ -1,0 +1,9 @@
+{
+    "min_battery": 10,
+    "check_interval": 10,
+    "num_cores": 8,
+    "enable_gpu": false,
+    "gpu_test_path": "",
+    "monitor_temp": true,
+    "max_temp_celsius": 90
+}
