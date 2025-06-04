@@ -21,8 +21,8 @@ An **INTENSE** battery stress testing tool for macOS that maximizes power consum
   - Continuous memory allocation/deallocation cycles
 - **I/O System Stress**:
   - Intensive disk read/write operations (10MB+ files)
-  - Network stress with DNS lookups and HTTP requests
   - Continuous file system operations
+  - High-frequency disk access patterns
 
 ### 📊 **Real-time Monitoring**
 - Battery discharge rate and remaining time
@@ -101,10 +101,10 @@ python3 battery_killer/scripts/battery_killer.py --duration 2 --verbose
 When you run Battery Killer, it simultaneously launches:
 - **16 CPU stress processes** (2 per core on 8-core system)
 - **1 GPU stress process** with multiple threads for video encoding, matrix operations
-- **1 I/O stress process** with disk write/read and network operations
+- **1 I/O stress process** with intensive disk write/read operations
 - **Multiple threads per process** for maximum resource utilization
 
-**Total: 18+ processes with 50+ threads** all working to drain your battery as fast as possible!
+**Total: 18+ processes with 45+ threads** all working to drain your battery as fast as possible!
 
 ## Requirements
 
@@ -176,8 +176,8 @@ Battery Killer uses an aggressive multi-threaded, multi-process approach to maxi
 
 4. **I/O System Stress**:
    - **Disk Operations**: Continuous 10MB+ file writes and reads
-   - **Network Activity**: DNS lookups and HTTP requests
    - **File System Stress**: Rapid file creation, modification, and deletion
+   - **Storage Interface Stress**: High-frequency disk access patterns
 
 5. **Multi-Threading Architecture**:
    ```python
@@ -257,7 +257,7 @@ The application uses a simple, efficient terminal-based architecture:
    - **CPU Power**: P = C × V² × f (voltage has squared effect)
    - **GPU Power**: Additional discrete/integrated GPU power draw
    - **Memory Power**: DDR4/DDR5 power consumption during intensive operations
-   - **I/O Power**: SSD/HDD motor power, network interface power
+   - **I/O Power**: SSD/HDD motor power and storage interface power
    - **System Power**: Cooling fans, voltage regulators, chipset power
    - **Total System Impact**: All components stressed simultaneously
 
@@ -278,14 +278,13 @@ The application uses a simple, efficient terminal-based architecture:
    - **CPU**: 100% utilization across all cores with multiple stress patterns
    - **GPU**: Hardware acceleration for video encoding and compute shaders
    - **Memory**: Large allocations with continuous operations
-   - **Storage**: Continuous 10MB+ file operations
-   - **Network**: DNS and HTTP requests creating network interface activity
+   - **Storage**: Continuous 10MB+ file operations with high-frequency access
 
 5. **Advanced Power Management Circumvention**:
    - Multiple stress patterns prevent CPU frequency scaling optimizations
    - GPU workloads prevent integrated graphics power saving
    - I/O operations prevent storage power management
-   - Network activity prevents network interface sleep modes
+   - Continuous operations prevent system sleep and power saving modes
 
 ## Scientific Background
 

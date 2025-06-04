@@ -479,27 +479,7 @@ def disk_read_stress():
         except:
             time.sleep(0.1)
 
-def network_stress():
-    \"\"\"Network I/O stress\"\"\"
-    import socket
-    import urllib.request
-    
-    while True:
-        try:
-            # DNS lookups
-            socket.gethostbyname('google.com')
-            socket.gethostbyname('apple.com')
-            socket.gethostbyname('github.com')
-            
-            # HTTP requests (if network available)
-            try:
-                urllib.request.urlopen('http://httpbin.org/get', timeout=1)
-            except:
-                pass
-                
-        except:
-            pass
-        time.sleep(0.1)
+
 
 if __name__ == '__main__':
     # Start I/O stress threads
@@ -512,10 +492,6 @@ if __name__ == '__main__':
     # Disk read thread
     t2 = threading.Thread(target=disk_read_stress, daemon=True)
     threads.append(t2)
-    
-    # Network thread
-    t3 = threading.Thread(target=network_stress, daemon=True)
-    threads.append(t3)
     
     for t in threads:
         t.start()
