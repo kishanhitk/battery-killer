@@ -1,45 +1,33 @@
 # Battery Killer
 
-A sophisticated battery stress testing tool for macOS with both GUI and CLI interfaces. This tool helps test battery life under heavy CPU load while monitoring system metrics in real-time.
-
-![Battery Killer GUI](screenshots/gui.png)
+A comprehensive battery stress testing tool for macOS with CLI-based real-time monitoring.
 
 ## Features
 
-- **Real-time System Monitoring**
-  - CPU usage per core
-  - CPU temperature
-  - Battery level and status
+- Intelligent CPU stress testing with temperature monitoring
+- Real-time statistics monitoring including:
+  - Battery discharge rate
+  - CPU temperature and usage
   - Memory usage
-  - System temperature protection
+  - Fan speed (RPM)
+  - Power consumption (Watts)
+  - Disk and network I/O
+  - System uptime and test duration
+- Terminal-based interface with ASCII performance graphs
+- Automatic throttling based on temperature thresholds
+- Safety measures to prevent overheating
 
-- **Interactive GUI**
-  - Live performance graphs
-  - Real-time metric updates
-  - Easy control interface
-  - Temperature and CPU core configuration
+## Installation & Usage
 
-- **CLI Interface**
-  - ASCII graphs for performance metrics
-  - Detailed logging
-  - Configuration file support
-  - Command-line arguments
-
-- **Safety Features**
-  - Automatic shutdown on high temperature
-  - Minimum battery level protection
-  - Graceful process handling
-  - Configurable safety limits
-
-## Installation
+### Step 1: Setup Environment
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/battery-killer.git
+   git clone https://github.com/kishanhitk/battery-killer.git
    cd battery-killer
    ```
 
-2. Create and activate a virtual environment:
+2. Create and activate virtual environment:
    ```bash
    python3 -m venv venv
    source venv/bin/activate
@@ -50,56 +38,50 @@ A sophisticated battery stress testing tool for macOS with both GUI and CLI inte
    pip install -r requirements.txt
    ```
 
-4. Install system dependencies (for temperature monitoring):
-   ```bash
-   brew install osx-cpu-temp
-   ```
+### Step 2: Run the Application
 
-## Usage
-
-### GUI Version
-
-Run the graphical interface:
 ```bash
-python battery_killer_gui.py
+python3 battery_killer/scripts/battery_killer.py [options]
 ```
 
-The GUI provides:
-- Start/Stop button for stress testing
-- CPU core count selector
-- Maximum temperature limit
-- Real-time performance graphs
-- System status indicators
+#### Command Line Options
 
-### CLI Version
-
-Run the command-line interface:
 ```bash
-python battery_killer.py [options]
+usage: battery_killer.py [-h] [--cores CORES] [--max-temp MAX_TEMP] [--duration DURATION] [--verbose]
+
+Battery Killer - A CPU stress testing tool
+
+options:
+  -h, --help            show this help message and exit
+  --cores CORES         Number of CPU cores to use (default: all physical cores)
+  --max-temp MAX_TEMP   Maximum CPU temperature in Celsius (default: 90°C)
+  --duration DURATION   Duration of stress test in minutes (default: 0 = run until stopped)
+  --verbose, -v         Show verbose output
 ```
 
-Available options:
-- `--config`: Path to configuration file
-- `--min-battery`: Minimum battery percentage (default: 5)
-- `--interval`: Check interval in seconds (default: 10)
-- `--cores`: Number of CPU cores to stress
-- `--max-temp`: Maximum temperature in Celsius (default: 90)
-- `--no-temp-check`: Disable temperature monitoring
+#### Examples
 
-### Configuration
+```bash
+# Basic usage - run until stopped
+python3 battery_killer/scripts/battery_killer.py
 
-Create a `config.json` file to customize settings:
-```json
-{
-    "min_battery": 10,
-    "check_interval": 10,
-    "num_cores": 8,
-    "enable_gpu": false,
-    "gpu_test_path": "",
-    "monitor_temp": true,
-    "max_temp_celsius": 90
-}
+# Run for 10 minutes with verbose output
+python3 battery_killer/scripts/battery_killer.py --duration 10 --verbose
+
+# Use 4 cores with 85°C temperature limit
+python3 battery_killer/scripts/battery_killer.py --cores 4 --max-temp 85
 ```
+
+## Requirements
+
+- macOS 10.14 or higher
+- Python 3.8 or higher
+- Administrative privileges (for temperature monitoring)
+
+### Dependencies
+
+- psutil
+- asciichartpy
 
 ## Project Structure
 
@@ -110,31 +92,11 @@ battery-killer/
 ├── battery_killer/
 │   ├── __init__.py
 │   ├── core.py           # Core stress testing functionality
-│   ├── gui.py           # GUI implementation
-│   └── utils.py         # Utility functions
-├── config.json          # Default configuration
-└── scripts/
-    ├── battery_killer.py     # CLI entry point
-    └── battery_killer_gui.py # GUI entry point
+│   ├── utils.py         # Utility functions
+│   └── scripts/
+│       └── battery_killer.py     # Main CLI script
+└── venv/                 # Virtual environment (created during setup)
 ```
-
-## Development
-
-### Prerequisites
-- Python 3.8+
-- macOS (tested on macOS Monterey and later)
-- Homebrew (for installing osx-cpu-temp)
-
-### Setting up development environment
-1. Install development dependencies:
-   ```bash
-   pip install -r requirements-dev.txt
-   ```
-
-2. Run tests:
-   ```bash
-   python -m pytest tests/
-   ```
 
 ## Contributing
 
@@ -227,29 +189,24 @@ Battery monitoring leverages the `psutil` library to:
    - Automatically pauses stress tests if battery gets too low
    - Resumes testing when charger is connected
 
-#### GUI Architecture
+#### Terminal Interface Architecture
 
-The GUI is built using a Model-View-Controller pattern:
+The application uses a simple, efficient terminal-based architecture:
 
-1. **Threading Model**:
-   - Uses `QThread` to separate UI from system monitoring
-   - Prevents UI freezing during intensive operations
-   - Ensures responsive controls even under system stress
-   - Implements proper thread synchronization with PyQt signals
+1. **Real-time Statistics Display**:
+   - Clean, formatted output with live system metrics
+   - Tabular format showing CPU, temperature, memory, battery, etc.
+   - Updates every few seconds with current system state
 
-2. **Real-time Graphing**:
-   - Utilizes circular buffers (`collections.deque`) to store time-series data
-   - Maintains fixed-size history (60 data points) for each metric
-   - Updates graphs at regular intervals (every second)
-   - Properly scales axis ranges to visualize trends
+2. **ASCII Chart Generation**:
+   - Historical data visualization using ASCII characters
+   - Circular buffers to maintain recent data points
+   - Automatic scaling for optimal chart display
 
-3. **Signal Flow**:
-   ```
-   Worker Thread ---> Signal Emission ---> UI Update Slots
-   ```
-   - Temperature and system stats are emitted as signals from the worker thread
-   - UI components connect to these signals and update when data changes
-   - This event-driven architecture ensures thread safety
+3. **Responsive Monitoring**:
+   - Non-blocking system monitoring
+   - Graceful shutdown with Ctrl+C
+   - Real-time temperature safety checks
 
 ### Why This Approach Works
 
@@ -319,6 +276,5 @@ By combining these approaches, Battery Killer creates a controlled, measurable, 
 ## Acknowledgments
 
 - [psutil](https://github.com/giampaolo/psutil) for system monitoring
-- [PyQt6](https://www.riverbankcomputing.com/software/pyqt/) for the GUI
-- [pyqtgraph](http://www.pyqtgraph.org/) for real-time plotting
+- [asciichartpy](https://github.com/kroitor/asciichart) for ASCII charts
 - [osx-cpu-temp](https://github.com/lavoiesl/osx-cpu-temp) for temperature monitoring

@@ -1,11 +1,8 @@
 import subprocess
 import time
 import psutil
-import argparse
 import logging
-import json
 import os
-from datetime import datetime
 from collections import deque
 from .utils import get_cpu_temperature, create_ascii_graph
 
@@ -43,10 +40,15 @@ class SystemStresser:
         
     def get_system_stats(self):
         """Get current system statistics."""
+        # Calculate disk usage percentage
+        disk_usage = psutil.disk_usage('/')
+        disk_usage_percent = (disk_usage.used / disk_usage.total) * 100
+        
         stats = {
             'cpu_percent': psutil.cpu_percent(interval=1, percpu=True),
             'memory_percent': psutil.virtual_memory().percent,
             'battery': psutil.sensors_battery(),
+            'disk_usage': disk_usage_percent,
         }
         
         # Get CPU temperature
@@ -275,50 +277,3 @@ if __name__ == '__main__':
         finally:
             self.stop_stress_tasks()
 
-def load_config(config_path):
-    """Load configuration from JSON file."""
-    try:
-        with open(config_path, 'r') as f:
-            return json.load(f)
-    except Exception as e:
-        logger.warning(f"Failed to load config file: {e}")
-        return None
-
-def main():
-    parser = argparse.ArgumentParser(description='Battery Killer - System Stress Test Tool')
-    parser.add_argument('--config', type=str, help='Path to configuration JSON file')
-    parser.add_argument('--min-battery', type=int, help='Minimum battery percentage before stopping')
-    parser.add_argument('--interval', type=int, help='Check interval in seconds')
-    parser.add_argument('--cores', type=int, help='Number of CPU cores to stress')
-    parser.add_argument('--enable-gpu', action='store_true', help='Enable GPU stress test')
-    parser.add_argument('--gpu-path', type=str, help='Path to GPU stress test executable')
-    parser.add_argument('--no-temp-check', action='store_true', help='Disable temperature monitoring')
-    parser.add_argument('--max-temp', type=int, help='Maximum temperature in Celsius')
-    
-    args = parser.parse_args()
-    
-    # Load config file if provided
-    config = load_config(args.config) if args.config else {}
-    
-    # Override config with command line arguments
-    if args.min_battery is not None:
-        config['min_battery'] = args.min_battery
-    if args.interval is not None:
-        config['check_interval'] = args.interval
-    if args.cores is not None:
-        config['num_cores'] = args.cores
-    if args.enable_gpu:
-        config['enable_gpu'] = True
-    if args.gpu_path:
-        config['gpu_test_path'] = args.gpu_path
-    if args.no_temp_check:
-        config['monitor_temp'] = False
-    if args.max_temp:
-        config['max_temp_celsius'] = args.max_temp
-    
-    # Create and run the stress test
-    stresser = SystemStresser(config)
-    stresser.run()
-
-if __name__ == "__main__":
-    main()
