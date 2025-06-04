@@ -74,7 +74,7 @@ def print_stats_line(stats, start_time, show_header=False):
     print(f"\r{format_time_delta(elapsed_time)} | {cpu_avg:6.1f}% | {temp_txt:7s} | {memory_txt:7s} | {batt_txt:12s} | {fan_txt:8s} | {power_txt:7s} | {disk_txt:6s}", end='')
 
 def main():
-    parser = argparse.ArgumentParser(description='Battery Killer - A CPU stress testing tool')
+    parser = argparse.ArgumentParser(description='Battery Killer - INTENSE multi-component stress testing tool')
     parser.add_argument('--cores', type=int, default=None, 
                         help='Number of CPU cores to use (default: all physical cores)')
     parser.add_argument('--max-temp', type=int, default=90, 

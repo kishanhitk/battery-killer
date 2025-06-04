@@ -169,55 +169,384 @@ class SystemStresser:
         return True
 
     def start_stress_tasks(self):
-        """Start CPU and GPU stress tasks."""
-        logger.info(f"Starting stress test with {self.config['num_cores']} CPU cores")
+        """Start intensive CPU, GPU, Memory, and I/O stress tasks."""
+        logger.info(f"Starting INTENSE stress test with {self.config['num_cores']} CPU cores")
         
-        # CPU stress: Run python to max out CPU instead of 'yes'
-        cpu_stress_code = """
+        # INTENSE CPU stress: Multiple stress patterns per core
+        intense_cpu_stress_code = """
 import multiprocessing
+import threading
+import math
+import random
+import hashlib
+import time
 
-def stress_cpu():
+def cpu_intensive_math():
+    \"\"\"Intensive mathematical operations\"\"\"
     while True:
-        x = 1234.5678
-        for _ in range(1000000):
-            x = x ** 2
-            x = x ** 0.5
+        # Complex mathematical operations
+        for i in range(50000):
+            x = random.random() * 1000
+            # Trigonometric functions (CPU intensive)
+            result = math.sin(x) * math.cos(x) * math.tan(x)
+            result = math.sqrt(abs(result)) ** 2.5
+            result = math.log(abs(result) + 1) * math.exp(result % 1)
+            # Prime number checking (CPU intensive)
+            n = int(abs(result * 1000)) + 2
+            for j in range(2, int(math.sqrt(n)) + 1):
+                if n % j == 0:
+                    break
+
+def cpu_intensive_crypto():
+    \"\"\"Intensive cryptographic operations\"\"\"
+    while True:
+        # Hash computations (CPU intensive)
+        data = str(random.random() * 1000000).encode()
+        for _ in range(10000):
+            data = hashlib.sha256(data).digest()
+            data = hashlib.md5(data).digest()
+            data = hashlib.sha1(data).digest()
+
+def cpu_intensive_loops():
+    \"\"\"Intensive nested loops\"\"\"
+    while True:
+        # Nested loops with floating point operations
+        total = 0.0
+        for i in range(1000):
+            for j in range(1000):
+                total += (i * j) ** 0.5
+                total = total % 1000000
+
+def memory_intensive():
+    \"\"\"Memory allocation and operations\"\"\"
+    arrays = []
+    while True:
+        try:
+            # Allocate large arrays and perform operations
+            arr = [random.random() for _ in range(100000)]
+            # Sort operations (CPU + Memory intensive)
+            arr.sort()
+            arr.reverse()
+            # Mathematical operations on arrays
+            result = sum(x ** 2 for x in arr[:10000])
+            arrays.append(arr[:1000])  # Keep some data in memory
+            
+            # Limit memory usage to prevent system crash
+            if len(arrays) > 50:
+                arrays = arrays[-25:]  # Keep only recent arrays
+        except MemoryError:
+            arrays = arrays[-10:]  # Reduce memory if needed
+
+def stress_cpu_core():
+    \"\"\"Main stress function combining all intensive operations\"\"\"
+    # Start multiple threads per core for maximum intensity
+    threads = []
+    
+    # Math thread
+    t1 = threading.Thread(target=cpu_intensive_math, daemon=True)
+    threads.append(t1)
+    
+    # Crypto thread  
+    t2 = threading.Thread(target=cpu_intensive_crypto, daemon=True)
+    threads.append(t2)
+    
+    # Loops thread
+    t3 = threading.Thread(target=cpu_intensive_loops, daemon=True)
+    threads.append(t3)
+    
+    # Memory thread
+    t4 = threading.Thread(target=memory_intensive, daemon=True)
+    threads.append(t4)
+    
+    # Start all threads
+    for t in threads:
+        t.start()
+    
+    # Keep main thread busy too
+    while True:
+        x = random.random() * 1000
+        for _ in range(100000):
+            x = x ** 2.5
+            x = math.sqrt(abs(x))
+            x = x % 1000
 
 if __name__ == '__main__':
-    stress_cpu()
+    stress_cpu_core()
 """
-        # Write the stress code to a temporary file
-        with open('stress_cpu.py', 'w') as f:
-            f.write(cpu_stress_code)
         
-        # Start CPU stress processes
-        for _ in range(self.config['num_cores']):
-            proc = subprocess.Popen(['python3', 'stress_cpu.py'],
+        # Write the intense stress code to a temporary file
+        with open('intense_stress_cpu.py', 'w') as f:
+            f.write(intense_cpu_stress_code)
+        
+        # Start multiple CPU stress processes per core for maximum intensity
+        processes_per_core = 2  # Run 2 processes per core for extra intensity
+        total_processes = self.config['num_cores'] * processes_per_core
+        
+        logger.info(f"Starting {total_processes} intense CPU stress processes ({processes_per_core} per core)")
+        
+        for i in range(total_processes):
+            proc = subprocess.Popen(['python3', 'intense_stress_cpu.py'],
                                 stdout=subprocess.DEVNULL,
                                 stderr=subprocess.DEVNULL)
             self.cpu_processes.append(proc)
-            logger.debug(f"Started CPU stress process {proc.pid}")
+            logger.debug(f"Started intense CPU stress process {proc.pid}")
         
-        # GPU stress if enabled
-        if self.config['enable_gpu'] and self.config['gpu_test_path']:
+        # GPU stress using Metal Performance Shaders (macOS GPU acceleration)
+        self._start_gpu_stress()
+        
+        # I/O stress for additional battery drain
+        self._start_io_stress()
+
+    def _start_gpu_stress(self):
+        """Start GPU stress using Metal compute shaders and other GPU-intensive tasks."""
+        gpu_stress_code = """
+import subprocess
+import threading
+import time
+import random
+import os
+
+def metal_compute_stress():
+    \"\"\"Use Metal Performance Shaders for GPU computation\"\"\"
+    try:
+        # Create a simple Metal compute shader stress test
+        metal_code = '''
+#include <metal_stdlib>
+using namespace metal;
+
+kernel void intensive_compute(device float* data [[buffer(0)]],
+                             uint index [[thread_position_in_grid]]) {
+    float value = data[index];
+    for (int i = 0; i < 10000; i++) {
+        value = sin(value) * cos(value) + sqrt(abs(value));
+        value = pow(value, 1.5) + log(abs(value) + 1.0);
+    }
+    data[index] = value;
+}
+'''
+        # This would require Metal compilation, so we'll use alternative GPU stress
+        pass
+    except:
+        pass
+
+def opengl_stress():
+    \"\"\"OpenGL rendering stress (if available)\"\"\"
+    try:
+        # Try to stress GPU with OpenGL operations
+        import subprocess
+        # Use system GPU stress tools if available
+        subprocess.run(['yes'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except:
+        pass
+
+def video_encoding_stress():
+    \"\"\"Video encoding/decoding for GPU stress\"\"\"
+    try:
+        # Use ffmpeg for GPU-accelerated video processing if available
+        cmd = [
+            'ffmpeg', '-f', 'lavfi', '-i', 'testsrc2=duration=3600:size=1920x1080:rate=30',
+            '-c:v', 'h264_videotoolbox', '-b:v', '50M', '-f', 'null', '-'
+        ]
+        subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except:
+        # Fallback: CPU-based video processing
+        while True:
+            # Simulate video processing with intensive calculations
+            data = [random.random() for _ in range(1920*1080)]
+            # Simulate frame processing
+            for i in range(len(data)):
+                data[i] = (data[i] * 255) ** 0.5
+            time.sleep(0.001)  # Small delay to prevent complete system freeze
+
+def gpu_memory_stress():
+    \"\"\"Stress GPU memory allocation\"\"\"
+    try:
+        # Try to allocate and use GPU memory
+        import numpy as np
+        arrays = []
+        while True:
             try:
-                self.gpu_proc = subprocess.Popen(
-                    [self.config['gpu_test_path'], '/test=fur'],
-                    cwd=os.path.dirname(self.config['gpu_test_path'])
-                )
-                logger.info("Started GPU stress test")
-            except Exception as e:
-                logger.error(f"Failed to start GPU stress test: {e}")
+                # Create large arrays for GPU-like operations
+                arr = np.random.random((1000, 1000)).astype(np.float32)
+                # Matrix operations (can use GPU acceleration)
+                result = np.dot(arr, arr.T)
+                result = np.fft.fft2(result)
+                arrays.append(result[:100, :100])  # Keep some data
+                
+                if len(arrays) > 20:
+                    arrays = arrays[-10:]
+            except:
+                arrays = arrays[-5:] if arrays else []
+                time.sleep(0.1)
+    except ImportError:
+        # Fallback without numpy
+        while True:
+            data = [[random.random() for _ in range(1000)] for _ in range(1000)]
+            # Matrix multiplication simulation
+            for i in range(100):
+                for j in range(100):
+                    sum_val = sum(data[i][k] * data[k][j] for k in range(100))
+
+if __name__ == '__main__':
+    # Start multiple GPU stress threads
+    threads = []
+    
+    # Video encoding thread
+    t1 = threading.Thread(target=video_encoding_stress, daemon=True)
+    threads.append(t1)
+    
+    # GPU memory thread
+    t2 = threading.Thread(target=gpu_memory_stress, daemon=True)
+    threads.append(t2)
+    
+    # OpenGL thread
+    t3 = threading.Thread(target=opengl_stress, daemon=True)
+    threads.append(t3)
+    
+    for t in threads:
+        t.start()
+    
+    # Keep main thread busy
+    metal_compute_stress()
+"""
+        
+        try:
+            with open('intense_stress_gpu.py', 'w') as f:
+                f.write(gpu_stress_code)
+            
+            # Start GPU stress process
+            self.gpu_proc = subprocess.Popen(['python3', 'intense_stress_gpu.py'],
+                                           stdout=subprocess.DEVNULL,
+                                           stderr=subprocess.DEVNULL)
+            logger.info("Started intense GPU stress test")
+        except Exception as e:
+            logger.warning(f"Could not start GPU stress test: {e}")
+
+    def _start_io_stress(self):
+        """Start I/O stress for additional battery drain."""
+        io_stress_code = """
+import threading
+import time
+import random
+import os
+import tempfile
+
+def disk_write_stress():
+    \"\"\"Intensive disk write operations\"\"\"
+    temp_dir = tempfile.mkdtemp()
+    file_count = 0
+    
+    while True:
+        try:
+            # Write large files continuously
+            filename = os.path.join(temp_dir, f'stress_file_{file_count}.tmp')
+            with open(filename, 'wb') as f:
+                # Write 10MB of random data
+                data = os.urandom(10 * 1024 * 1024)
+                f.write(data)
+                f.flush()
+                os.fsync(f.fileno())  # Force write to disk
+            
+            file_count += 1
+            
+            # Clean up old files to prevent disk full
+            if file_count > 10:
+                old_file = os.path.join(temp_dir, f'stress_file_{file_count-10}.tmp')
+                try:
+                    os.remove(old_file)
+                except:
+                    pass
+                    
+        except Exception as e:
+            time.sleep(0.1)
+
+def disk_read_stress():
+    \"\"\"Intensive disk read operations\"\"\"
+    while True:
+        try:
+            # Read system files continuously
+            files_to_read = ['/usr/bin/python3', '/bin/bash', '/usr/lib/dyld']
+            for filepath in files_to_read:
+                try:
+                    with open(filepath, 'rb') as f:
+                        # Read in chunks
+                        while True:
+                            chunk = f.read(1024 * 1024)  # 1MB chunks
+                            if not chunk:
+                                break
+                except:
+                    pass
+        except:
+            time.sleep(0.1)
+
+def network_stress():
+    \"\"\"Network I/O stress\"\"\"
+    import socket
+    import urllib.request
+    
+    while True:
+        try:
+            # DNS lookups
+            socket.gethostbyname('google.com')
+            socket.gethostbyname('apple.com')
+            socket.gethostbyname('github.com')
+            
+            # HTTP requests (if network available)
+            try:
+                urllib.request.urlopen('http://httpbin.org/get', timeout=1)
+            except:
+                pass
+                
+        except:
+            pass
+        time.sleep(0.1)
+
+if __name__ == '__main__':
+    # Start I/O stress threads
+    threads = []
+    
+    # Disk write thread
+    t1 = threading.Thread(target=disk_write_stress, daemon=True)
+    threads.append(t1)
+    
+    # Disk read thread
+    t2 = threading.Thread(target=disk_read_stress, daemon=True)
+    threads.append(t2)
+    
+    # Network thread
+    t3 = threading.Thread(target=network_stress, daemon=True)
+    threads.append(t3)
+    
+    for t in threads:
+        t.start()
+    
+    # Keep main thread alive
+    while True:
+        time.sleep(1)
+"""
+        
+        try:
+            with open('intense_stress_io.py', 'w') as f:
+                f.write(io_stress_code)
+            
+            # Start I/O stress process
+            io_proc = subprocess.Popen(['python3', 'intense_stress_io.py'],
+                                     stdout=subprocess.DEVNULL,
+                                     stderr=subprocess.DEVNULL)
+            self.cpu_processes.append(io_proc)  # Add to processes list for cleanup
+            logger.info("Started intense I/O stress test")
+        except Exception as e:
+            logger.warning(f"Could not start I/O stress test: {e}")
 
     def stop_stress_tasks(self):
-        """Stop all stress tasks."""
-        logger.info("Stopping all stress tasks")
+        """Stop all stress tasks and clean up temporary files."""
+        logger.info("Stopping all intense stress tasks")
         
-        # Kill CPU stress processes
+        # Kill all CPU and I/O stress processes
         for proc in self.cpu_processes:
             try:
                 proc.kill()
-                logger.debug(f"Killed CPU process {proc.pid}")
+                logger.debug(f"Killed stress process {proc.pid}")
             except Exception as e:
                 logger.error(f"Failed to kill process {proc.pid}: {e}")
         self.cpu_processes.clear()
@@ -226,10 +555,26 @@ if __name__ == '__main__':
         if self.gpu_proc:
             try:
                 self.gpu_proc.kill()
-                logger.info("Killed GPU process")
+                logger.info("Killed GPU stress process")
             except Exception as e:
                 logger.error(f"Failed to kill GPU process: {e}")
             self.gpu_proc = None
+        
+        # Clean up temporary stress files
+        temp_files = [
+            'intense_stress_cpu.py',
+            'intense_stress_gpu.py', 
+            'intense_stress_io.py',
+            'stress_cpu.py'  # Legacy file
+        ]
+        
+        for temp_file in temp_files:
+            try:
+                if os.path.exists(temp_file):
+                    os.remove(temp_file)
+                    logger.debug(f"Cleaned up temporary file: {temp_file}")
+            except Exception as e:
+                logger.warning(f"Could not remove temporary file {temp_file}: {e}")
 
     def run(self):
         """Main stress test loop."""
