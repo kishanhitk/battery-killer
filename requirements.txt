@@ -1,3 +1,7 @@
 psutil>=5.9.0
 asciichartpy>=1.5.25
 numpy>=1.21.0
+coremltools>=7.0
+tensorflow>=2.13.0
+torch>=2.0.0
+torchvision>=0.15.0
